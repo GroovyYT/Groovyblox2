@@ -1,5 +1,5 @@
 {
-  "name": "groovyblox2",
+  "name": "roblox-2015-backend",
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {
