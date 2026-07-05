@@ -2,58 +2,52 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Logger Tracker: Prints mobile traffic live into your Render dashboard logs
+// 1. Logger: Prati što točno mobitel traži
 app.use((req, res, next) => {
-    console.log(`[App Connection] Mobile phone pinging endpoint path: ${req.url}`);
+    console.log(`[Klijent Traži]: ${req.url}`);
     next();
 });
 
-// 2. Client Version Authorization: Keeps the 2015 app unlocked
+// 2. Glavni v2015 Bootstrapper - Popravlja zamrzavanje početnog ekrana!
+app.get('/Setting/QuietGet/ClientAppSettings/', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    res.send({
+        "FFlagConnectMobileToCustomServer": "True",
+        "DFFlagDisableNewInGameChat": "True"
+    });
+});
+
+// 3. Provjera verzije (Version Check)
 app.get('/Game/GetCurrentVersion.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     res.send('2.200.60733');
 });
 
-// 3. The Core Joint Script Bootstrapper: Compiles your custom level map structure
+// 4. Place Launcher: Automatski presreće "Play Now" i pokreće igru
+app.get('/Game/PlaceLauncher.ashx', (req, res) => {
+    res.set('Content-Type', 'text/xml');
+    const host = req.get('host');
+    res.send(`<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponse>`);
+});
+
+// 5. Join Script: Učitava tvoj SwordFight file s GitHuba
 app.get('/Game/Join.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const host = req.get('host');
-    
-    const luaScript = `
-    -- 2015 Mobile Engine Initializer
-    local game = game
-    local workspace = game:GetService("Workspace")
-    
-    -- Stream map binaries straight from your GitHub asset directory
-    game:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rblx")
-    
-    -- Generate local player character configuration properties
-    local players = game:GetService("Players")
-    local player = players:CreateLocalPlayer(0)
-    player:LoadCharacter()
-    
-    -- Optimize rendering performance pipelines
-    game:GetService("Lighting").Outlines = false
-    `;
+    const luaScript = `-- 2015 Mobile Initializer\nlocal game = game\nlocal workspace = game:GetService("Workspace")\ngame:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rblx")\nlocal players = game:GetService("Players")\nlocal player = players:CreateLocalPlayer(0)\nplayer:LoadCharacter()\ngame:GetService("Lighting").Outlines = false\n`;
     res.send(luaScript);
 });
 
-// 4. THE ULTIMATE AUTO-PLAY BYPASS: Forces any standard webpage requests to immediately trigger game execution!
+// 6. Catch-All Web: Što god aplikacija zatraži na webu, šaljemo joj XML za pokretanje igre!
 app.use((req, res, next) => {
-    // If the old app is asking for the base index page, home layouts, or asset category menus...
-    if (!req.url.includes('Join.ashx') && !req.url.includes('GetCurrentVersion.ashx') && !req.url.includes('/asset/')) {
-        console.log(`[Auto-Play Trigger] Forcing game launch sequence on input request: ${req.url}`);
-        
-        // Return the precise XML schema that initiates client map generation natively
+    if (!req.url.includes('.ashx') && !req.url.includes('/asset/') && req.url !== '/Setting/QuietGet/ClientAppSettings/') {
         res.set('Content-Type', 'text/xml');
         const host = req.get('host');
-        const xmlResponse = `<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponse>`;
-        return res.send(xmlResponse);
+        return res.send(`<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponseblank>`);
     }
     next();
 });
 
-// Launch container listener engine smoothly
 app.listen(PORT, () => { 
     console.log(`Server running smoothly on port ${PORT}`); 
 });
