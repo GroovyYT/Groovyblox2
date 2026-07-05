@@ -2,69 +2,48 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// This is the logger line block
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} request to: ${req.url}`);
     next();
 });
 
-// Catch-All Webpage Handler: Redirects all 404 page requests straight to our custom games dashboard
+// The Catch-All Redirect: This forces the app to show your games page instead of a 404 error
 app.use((req, res, next) => {
-    // If the old app is asking for a web layout or an unknown ashx page, redirect it to our working path
     if (!req.url.includes('.ashx') && req.url !== '/games' && req.url !== '/') {
-        console.log(`[Redirect] Redirecting unknown route ${req.url} straight to /games`);
         return res.redirect('/games');
     }
     next();
 });
 
-// 1. Tell the app it is on the correct version
+// 1. Version Check Endpoint
 app.get('/Game/GetCurrentVersion.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     res.send('2.200.60733');
 });
 
-// 2. The Place Launcher: Tells the phone where to find the game file
+// 2. Place Launcher Endpoint
 app.get('/Game/PlaceLauncher.ashx', (req, res) => {
     res.set('Content-Type', 'text/xml');
     const host = req.get('host');
-    const xmlResponse = `<?xml version="1.0" encoding="utf-8" ?>
-<PlayResponse>
-    <Status>2</Status>
-    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>
-    <AuthenticationUrl></AuthenticationUrl>
-</PlayResponse>`;
+    const xmlResponse = `<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponse>`;
     res.send(xmlResponse);
 });
 
-// 3. The Join Script: Tells the 2015 engine how to build the map locally
+// 3. Game Join Script Endpoint
 app.get('/Game/Join.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const host = req.get('host');
-    
-    // This Lua script tells the 2015 mobile engine to load your uploaded map file
-    const luaScript = `
-    -- 2015 Mobile Bootstrapper
-    local game = game
-    local workspace = game:GetService("Workspace")
-    
-    -- Load the map file from your Render server asset path
-    game:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rbxl")
-    
-    -- Spawn the local player
-    local players = game:GetService("Players")
-    local player = players:CreateLocalPlayer(0)
-    player:LoadCharacter()
-    
-    -- Set classic 2015 lighting
-    game:GetService("Lighting").Outlines = false
-    `;
+    const luaScript = `-- 2015 Mobile Bootstrapper\nlocal game = game\nlocal workspace = game:GetService("Workspace")\ngame:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rbxl")\nlocal players = game:GetService("Players")\nlocal player = players:CreateLocalPlayer(0)\nplayer:LoadCharacter()\ngame:GetService("Lighting").Outlines = false\n`;
     res.send(luaScript);
 });
 
-// Base Route
-app.get('/', (req, res) => { res.send('Your 2015 Revival Server is Fully Active!'); });
+// 4. Base Route
+app.get('/', (req, res) => { 
+    res.send('Your 2015 Revival Server is Fully Active!'); 
+});
 
-// 4. Stranica s igrama (Games Page) koja popravlja 404 grešku
+// 5. Custom Games Page
 app.get('/games', (req, res) => {
     res.set('Content-Type', 'text/html');
     res.send(`
@@ -84,7 +63,6 @@ app.get('/games', (req, res) => {
             <div class="game-card">
                 <h3 style="margin:0;">Moj Prvi 2015 Server</h3>
                 <p style="color:#666; font-size:14px;">Klikni ispod za ulazak u tvoju custom mapu!</p>
-                <!-- Ovaj gumb šalje signal aplikaciji da pokrene join skriptu -->
                 <button class="play-btn" onclick="window.location.href='robloxmobile://placeID=1'">IGRAJ</button>
             </div>
         </body>
@@ -92,5 +70,7 @@ app.get('/games', (req, res) => {
     `);
 });
 
-app.listen(PORT, () => { console.log(`Server active on port ${PORT}`); });
-
+// Start the server cleanly
+app.listen(PORT, () => { 
+    console.log(`Server running smoothly on port ${PORT}`); 
+});
