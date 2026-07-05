@@ -2,80 +2,58 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// HTML kod za sučelje s gumbom (izvučen u varijablu radi lakšeg korištenja)
-const gamesHtmlLayout = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { background-color: #EEEEEE; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        .game-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; width: 85%; max-width: 300px; margin-top: 30px; }
-        .play-btn { background-color: #0084FF; color: white; border: none; padding: 12px 20px; font-size: 18px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; }
-        h1 { color: #333; font-size: 24px; margin-top: 20px; }
-    </style>
-</head>
-<body>
-    <h1>Groovyblox Games</h1>
-    <div class="game-card">
-        <h3 style="margin:0; color:#222;">Sword Fight On The Heights IV</h3>
-        <p style="color:#666; font-size:14px; margin-top:8px;">Klikni ispod za ulazak u tvoju custom mapu!</p>
-        <button class="play-btn" onclick="window.location.href='robloxmobile://placeID=1'">IGRAJ</button>
-    </div>
-</body>
-</html>
-`;
-
-// 1. Logger: Prati zahtjeve u Render konzoli
+// 1. Logger Tracker: Prints mobile traffic live into your Render dashboard logs
 app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} request to: ${req.url}`);
+    console.log(`[App Connection] Mobile phone pinging endpoint path: ${req.url}`);
     next();
 });
 
-// 2. Provjera verzije (Version Check)
+// 2. Client Version Authorization: Keeps the 2015 app unlocked
 app.get('/Game/GetCurrentVersion.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     res.send('2.200.60733');
 });
 
-// 3. Pokretač mjesta (Place Launcher)
-app.get('/Game/PlaceLauncher.ashx', (req, res) => {
-    res.set('Content-Type', 'text/xml');
-    const host = req.get('host');
-    const xmlResponse = `<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponse>`;
-    res.send(xmlResponse);
-});
-
-// 4. Skripta za ulazak u igru (Join Script)
+// 3. The Core Joint Script Bootstrapper: Compiles your custom level map structure
 app.get('/Game/Join.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const host = req.get('host');
-    const luaScript = `-- 2015 Mobile Bootstrapper\nlocal game = game\nlocal workspace = game:GetService("Workspace")\ngame:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rblx")\nlocal players = game:GetService("Players")\nlocal player = players:CreateLocalPlayer(0)\nplayer:LoadCharacter()\ngame:GetService("Lighting").Outlines = false\n`;
+    
+    const luaScript = `
+    -- 2015 Mobile Engine Initializer
+    local game = game
+    local workspace = game:GetService("Workspace")
+    
+    -- Stream map binaries straight from your GitHub asset directory
+    game:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rblx")
+    
+    -- Generate local player character configuration properties
+    local players = game:GetService("Players")
+    local player = players:CreateLocalPlayer(0)
+    player:LoadCharacter()
+    
+    -- Optimize rendering performance pipelines
+    game:GetService("Lighting").Outlines = false
+    `;
     res.send(luaScript);
 });
 
-// 5. Glavna ruta '/'
-app.get('/', (req, res) => {
-    res.set('Content-Type', 'text/html');
-    res.send(gamesHtmlLayout);
-});
-
-// 6. Rezervna ruta '/games' (za svaki slučaj ako APK eksplicitno traži ovaj direktorij)
-app.get('/games', (req, res) => {
-    res.set('Content-Type', 'text/html');
-    res.send(gamesHtmlLayout);
-});
-
-// 7. PAMETNI CATCH-ALL: Umjesto res.redirect, odmah šaljemo HTML izgled!
+// 4. THE ULTIMATE AUTO-PLAY BYPASS: Forces any standard webpage requests to immediately trigger game execution!
 app.use((req, res, next) => {
-    if (!req.url.includes('.ashx') && !req.url.includes('/asset/')) {
-        res.set('Content-Type', 'text/html');
-        return res.send(gamesHtmlLayout);
+    // If the old app is asking for the base index page, home layouts, or asset category menus...
+    if (!req.url.includes('Join.ashx') && !req.url.includes('GetCurrentVersion.ashx') && !req.url.includes('/asset/')) {
+        console.log(`[Auto-Play Trigger] Forcing game launch sequence on input request: ${req.url}`);
+        
+        // Return the precise XML schema that initiates client map generation natively
+        res.set('Content-Type', 'text/xml');
+        const host = req.get('host');
+        const xmlResponse = `<?xml version="1.0" encoding="utf-8" ?>\n<PlayResponse>\n    <Status>2</Status>\n    <JoinUrl>https://${host}/Game/Join.ashx</JoinUrl>\n    <AuthenticationUrl></AuthenticationUrl>\n</PlayResponse>`;
+        return res.send(xmlResponse);
     }
     next();
 });
 
-// Pokretanje poslužitelja
+// Launch container listener engine smoothly
 app.listen(PORT, () => { 
     console.log(`Server running smoothly on port ${PORT}`); 
 });
