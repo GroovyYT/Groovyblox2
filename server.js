@@ -53,5 +53,32 @@ app.get('/Game/Join.ashx', (req, res) => {
 
 // Base Route
 app.get('/', (req, res) => { res.send('Your 2015 Revival Server is Fully Active!'); });
+// 4. Stranica s igrama (Games Page) koja popravlja 404 grešku
+app.get('/games', (req, res) => {
+    res.set('Content-Type', 'text/html');
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { background-color: #EEEEEE; font-family: sans-serif; text-align: center; padding: 20px; }
+                .game-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; width: 80%; max-width: 300px; margin-top: 20px; }
+                .play-btn { background-color: #0084FF; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 15px; }
+                h1 { color: #333; font-size: 22px; }
+            </style>
+        </head>
+        <body>
+            <h1>Groovyblox Games</h1>
+            <div class="game-card">
+                <h3 style="margin:0;">Moj Prvi 2015 Server</h3>
+                <p style="color:#666; font-size:14px;">Klikni ispod za ulazak u tvoju custom mapu!</p>
+                <!-- Ovaj gumb šalje signal aplikaciji da pokrene join skriptu -->
+                <button class="play-btn" onclick="window.location.href='robloxmobile://placeID=1'">IGRAJ</button>
+            </div>
+        </body>
+        </html>
+    `);
+});
 
-app.listen(PORT, () => { console.log:// Server active on port ${PORT}`); });
+app.listen(PORT, () => { console.log(`Server active on port ${PORT}`); });
