@@ -31,13 +31,13 @@ app.get('/Game/Join.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const host = req.get('host');
     
-    // This Lua script tells the 2015 mobile engine to load a map directly from your server
+    // This Lua script tells the 2015 mobile engine to load your uploaded map file
     const luaScript = `
     -- 2015 Mobile Bootstrapper
     local game = game
     local workspace = game:GetService("Workspace")
     
-    -- Load the map file from your Render server static path
+    -- Load the map file from your Render server asset path
     game:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rbxl")
     
     -- Spawn the local player
@@ -54,4 +54,4 @@ app.get('/Game/Join.ashx', (req, res) => {
 // Base Route
 app.get('/', (req, res) => { res.send('Your 2015 Revival Server is Fully Active!'); });
 
-app.listen(PORT, () => { console.log(`Server active on port ${PORT}`); });
+app.listen(PORT, () => { console.log:// Server active on port ${PORT}`); });
