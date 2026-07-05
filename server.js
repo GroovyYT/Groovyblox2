@@ -7,6 +7,16 @@ app.use((req, res, next) => {
     next();
 });
 
+// Catch-All Webpage Handler: Redirects all 404 page requests straight to our custom games dashboard
+app.use((req, res, next) => {
+    // If the old app is asking for a web layout or an unknown ashx page, redirect it to our working path
+    if (!req.url.includes('.ashx') && req.url !== '/games' && req.url !== '/') {
+        console.log(`[Redirect] Redirecting unknown route ${req.url} straight to /games`);
+        return res.redirect('/games');
+    }
+    next();
+});
+
 // 1. Tell the app it is on the correct version
 app.get('/Game/GetCurrentVersion.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -53,6 +63,7 @@ app.get('/Game/Join.ashx', (req, res) => {
 
 // Base Route
 app.get('/', (req, res) => { res.send('Your 2015 Revival Server is Fully Active!'); });
+
 // 4. Stranica s igrama (Games Page) koja popravlja 404 grešku
 app.get('/games', (req, res) => {
     res.set('Content-Type', 'text/html');
