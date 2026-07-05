@@ -2,13 +2,13 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// This is the logger line block
+// 1. Logger: Prati zahtjeve s mobitela u Render konzoli
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} request to: ${req.url}`);
     next();
 });
 
-// The Catch-All Redirect: This forces the app to show your games page instead of a 404 error
+// 2. Catch-All Redirect: Sprječava 404 grešku i otvara stranicu s igrama
 app.use((req, res, next) => {
     if (!req.url.includes('.ashx') && req.url !== '/games' && req.url !== '/') {
         return res.redirect('/games');
@@ -16,13 +16,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// 1. Version Check Endpoint
+// 3. Provjera verzije (Version Check)
 app.get('/Game/GetCurrentVersion.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     res.send('2.200.60733');
 });
 
-// 2. Place Launcher Endpoint
+// 4. Pokretač mjesta (Place Launcher)
 app.get('/Game/PlaceLauncher.ashx', (req, res) => {
     res.set('Content-Type', 'text/xml');
     const host = req.get('host');
@@ -30,20 +30,20 @@ app.get('/Game/PlaceLauncher.ashx', (req, res) => {
     res.send(xmlResponse);
 });
 
-// 3. Game Join Script Endpoint
+// 5. Skripta za ulazak u igru (Join Script) - Ovdje je upisana tvoja SwordFight mapa!
 app.get('/Game/Join.ashx', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const host = req.get('host');
-    const luaScript = `-- 2015 Mobile Bootstrapper\nlocal game = game\nlocal workspace = game:GetService("Workspace")\ngame:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rbxl")\nlocal players = game:GetService("Players")\nlocal player = players:CreateLocalPlayer(0)\nplayer:LoadCharacter()\ngame:GetService("Lighting").Outlines = false\n`;
+    const luaScript = `-- 2015 Mobile Bootstrapper\nlocal game = game\nlocal workspace = game:GetService("Workspace")\ngame:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rblx")\nlocal players = game:GetService("Players")\nlocal player = players:CreateLocalPlayer(0)\nplayer:LoadCharacter()\ngame:GetService("Lighting").Outlines = false\n`;
     res.send(luaScript);
 });
 
-// 4. Base Route
+// 6. Početna stranica za provjeru preglednika
 app.get('/', (req, res) => { 
     res.send('Your 2015 Revival Server is Fully Active!'); 
 });
 
-// 5. Custom Games Page
+// 7. Prilagođena stranica s igrama (Games Page)
 app.get('/games', (req, res) => {
     res.set('Content-Type', 'text/html');
     res.send(`
@@ -61,7 +61,7 @@ app.get('/games', (req, res) => {
         <body>
             <h1>Groovyblox Games</h1>
             <div class="game-card">
-                <h3 style="margin:0;">Moj Prvi 2015 Server</h3>
+                <h3 style="margin:0;">Sword Fight On The Heights IV</h3>
                 <p style="color:#666; font-size:14px;">Klikni ispod za ulazak u tvoju custom mapu!</p>
                 <button class="play-btn" onclick="window.location.href='robloxmobile://placeID=1'">IGRAJ</button>
             </div>
@@ -70,7 +70,7 @@ app.get('/games', (req, res) => {
     `);
 });
 
-// Start the server cleanly
+// Pokretanje servera
 app.listen(PORT, () => { 
     console.log(`Server running smoothly on port ${PORT}`); 
 });
