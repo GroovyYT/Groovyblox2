@@ -38,7 +38,7 @@ app.get('/Game/Join.ashx', (req, res) => {
     local workspace = game:GetService("Workspace")
     
     -- Load the map file from your Render server static path
-    game:Load("https://${host}/asset/classic_map.rbxl")
+    game:Load("https://${host}/asset/SwordFightOnTheHeightsIV.rbxl")
     
     -- Spawn the local player
     local players = game:GetService("Players")
